@@ -15,9 +15,10 @@ License: [BSD](http://www.opensource.org/licenses/bsd-license.php)
 import re
 
 from django.conf import settings
+from django.utils.deprecation import MiddlewareMixin
 
 
-class HostsMiddleware(object):
+class HostsMiddleware(MiddlewareMixin):
     """Rout hosts to corresponding urlconfs.
     
     urlconfs should be defined in DJHOST_CONF_EXACT and DJHOST_CONF_REGEX for exact and regex matching of hosts respectively.
@@ -36,3 +37,4 @@ class HostsMiddleware(object):
             for k,v in djhost_conf.items():
                 if re.match(k, host):
                     request.urlconf = v
+                    break
