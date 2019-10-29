@@ -12,17 +12,27 @@ License: [BSD](http://www.opensource.org/licenses/bsd-license.php)
 """
 
 
-
+import re
 
 from django.conf import settings
 
 
-class MultipleDomainMiddleware(object):
+class HostsMiddleware(object):
+    """Rout hosts to corresponding urlconfs.
+    
+    urlconfs should be defined in DJHOST_CONF_EXACT and DJHOST_CONF_REGEX for exact and regex matching of hosts respectively.
+    
+    """
     def process_request(self, request):
-        url_config = getattr(settings, 'MULTIURL_CONFIG', None)
-        if not url_config:
-            return
-
         host = request.get_host()
-        if host in url_config:
-            request.urlconf = url_config[host]
+
+        djhost_conf = getattr(settings, 'DJHOST_CONF_EXACT', None)
+        if djhost_conf:
+            if host in djhost_conf:
+                request.urlconf = djhost_conf[host]
+        
+        djhost_conf = getattr(settings, 'DJHOST_CONF_REGEX', None)
+        if djhost_conf:
+            for k,v in djhost_conf.items():
+                if re.match(k, host):
+                    request.urlconf = v
